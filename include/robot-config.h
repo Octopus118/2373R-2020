@@ -12,6 +12,8 @@ extern motor I1;
 extern motor T;
 extern motor I2;
 extern motor LIFT;
+extern led LEDA;
+extern led LEDH;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

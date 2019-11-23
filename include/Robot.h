@@ -32,7 +32,7 @@ class TankDrive : public Drive
   public:
   motor LF = NULL, RF = NULL, LM = NULL, RM = NULL, LB = NULL, RB = NULL;
   void drive(double inches, double velocity = 150);
-  void driveTime(int time, double velocity = 150);
+  void driveTime(int time, directionType direction = forward, double velocity = 150);
   void turn(double degrees, turnType direction, double velocity = 50);
   void turnTo(double x, double y, double velocity = 150);
   void driveBase(driveType type);

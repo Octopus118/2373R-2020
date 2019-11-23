@@ -51,13 +51,18 @@ void Tray::toggleMechanism(controller::button button, double velocity)
     }
     else
     {
-      int finalPosition = 254;
+      /*int finalPosition = 254;
       double acceleration = velocity / 1; //d/s^2, velocity/time
       m1.startRotateTo(finalPosition, rotationUnits::deg, velocity, rpm);
       while(m1.position(deg) < finalPosition)
       {
         m1.setVelocity(sqrt((velocity * velocity) + (2 * acceleration * m1.position(deg))), rpm);
-      }
+      }*/
+      I1.spin(reverse, velocity, rpm);
+      I2.spin(reverse, velocity, rpm);
+      m1.rotateTo(254, rotationUnits::deg, velocity, rpm);
+      I1.stop(coast);
+      I2.stop(coast);
     }
     trayUp = !trayUp;
   }

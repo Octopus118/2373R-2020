@@ -37,3 +37,18 @@ void print2373R()
       Brain.Screen.newLine();
       Brain.Screen.print("                                      /       ");
     }
+
+void lights()
+{
+  if(Brain.timer(msec)<=200)
+    {
+      LEDA.on();
+      LEDH.off();
+    }
+    else if(Brain.timer(msec)<=400)
+    {
+      LEDA.off();
+      LEDH.on();
+    }
+    else Brain.resetTimer();
+}

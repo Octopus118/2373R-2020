@@ -34,27 +34,20 @@ void TankDrive::drive(double inches, double velocity)
   controllerPrint("Driving %.1f inches at a speed of %f", inches, velocity);
   LF.startRotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
   RF.startRotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
-  LM.startRotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
-  RM.startRotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
   LB.startRotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
   RB.rotateFor(forward, inchesToRotations(inches), rotationUnits::rev, velocity, velocityUnits::rpm);
 }
 
-void TankDrive::driveTime(int time, double velocity)
+void TankDrive::driveTime(int time, directionType direction, double velocity)
 {
   controllerPrint("Driving for %d milliseconds at a speed of %.0f", time, velocity);
-  //Currently waits for completion
-  LF.spin(forward, velocity, velocityUnits::rpm);
-  RF.spin(forward, velocity, velocityUnits::rpm);
-  LM.spin(forward, velocity, velocityUnits::rpm);
-  RM.spin(forward, velocity, velocityUnits::rpm);
-  LB.spin(forward, velocity, velocityUnits::rpm);
-  RB.spin(forward, velocity, velocityUnits::rpm);
+  LF.spin(direction, velocity, velocityUnits::rpm);
+  RF.spin(direction, velocity, velocityUnits::rpm);
+  LB.spin(direction, velocity, velocityUnits::rpm);
+  RB.spin(direction, velocity, velocityUnits::rpm);
   wait(time, msec);
   LF.stop();
   RF.stop();
-  LM.stop();
-  RM.stop();
   LB.stop();
   RB.stop();
 }
