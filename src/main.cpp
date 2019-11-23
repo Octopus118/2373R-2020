@@ -10,172 +10,113 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// LF                   motor         20              
-// LB                   motor         10              
-// RF                   motor         11              
-// RB                   motor         1               
+// LeftFront            motor         1               
+// RightFront           motor         10              
+// LeftBack             motor         11              
+// RightBack            motor         20              
 // Controller1          controller                    
-// LIFT                 motor         4               
-// TILT                 motor         2               
-// LI                   motor         9               
-// RI                   motor         3               
+// I1                   motor         9               
+// T                    motor         12              
+// I2                   motor         4               
+// Arm                 motor         2               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
-#include "RobotCommands.h"
+#include "Robot.h"
+#include "Print2373R.h"
 
 using namespace vex;
 
 // A global instance of competition
 competition Competition;
 
-// A global instance of the robot
-RobotCommands robot;
+// Global Robot
+TankDrive robot;
+Tray Tray;
+Actuator Intake;
+Actuator Arm;
 
 void pre_auton(void)
 {
-  // Initializing Robot Configuration
   vexcodeInit();
-  printf("Code made by Ian Lansdowne, Team 2373R\n");
-  printf("Battery Percentage: %-int%%", int (100 * Brain.Battery.voltage(vex::voltageUnits::volt) / 12.8));
-  //Print brain artwork
-  robot.print2373R();
-  //reset motor encoders
-  LIFT.setPosition(0, rotationUnits::deg);
-  TILT.setPosition(0, rotationUnits::deg);
-  //Must return from this function or the autonomous and usercontrol tasks will not be started
-  return;
+  //Adds Contoller
+  robot.ControllerPtr = &Controller1;
+  //Adds Drivebase Motors
+  robot.LF = LeftFront;
+  robot.RF = RightFront;
+  robot.LB = LeftBack;
+  robot.RB = RightBack;
+  //Adds Intake Motors
+  Intake.m1 = I1;
+  Intake.m2 = I2;
+  //Adds Claw Motor
+  Tray.m1 = T;
+  //Adds Arm Motor
+  Arm.m1 = LIFT;
+  //Sets the size of the robot and its wheels
+  robot.width = 11.5;
+  robot.length = 0;
+  robot.wheelDiameter = 4;
+
+  print2373R();
 }
 
 void autonomous(void)
 {
-  /*
-  int autonPinConfig [2] = {Brain.ThreeWirePort.A.value(), Brain.ThreeWirePort.B.value()};
-  if (autonPinConfig[0] == 0 && autonPinConfig[1] == 0)
-  {
-    //Red 1
-    LIFT.rotateFor(forward, 5, rotationUnits::rev);
-    LIFT.rotateFor(reverse, 5, rotationUnits::rev);
-    LI.spin(forward, 200, velocityUnits::rpm);
-    RI.spin(forward, 200, velocityUnits::rpm);
-    robot.driveV2(13, 40);
-    LI.stop(brakeType::hold);
-    RI.stop(brakeType::hold);
-    robot.turn(180, 25, true);
-    robot.driveV2(13, 40);
-    robot.turn(80, 25, false);
-    robot.drive(4, 50);
-    robot.tiltTray(true);
-    LI.spin(forward, 200, velocityUnits::rpm);
-    RI.spin(forward, 200, velocityUnits::rpm);
-    robot.drive(-40, 10);
-    robot.tiltTray(false);
-    LI.stop(brakeType::coast);
-    RI.stop(brakeType::coast);
-  }
-  else if (autonPinConfig[0] == 1 && autonPinConfig[1] == 0)
-  {
-    //Blue 1
-    LIFT.rotateFor(forward, 5, rotationUnits::rev);
-    LIFT.rotateFor(reverse, 5, rotationUnits::rev);
-    LI.spin(forward, 200, velocityUnits::rpm);
-    RI.spin(forward, 200, velocityUnits::rpm);
-    robot.driveV2(13, 40);
-    LI.stop(brakeType::hold);
-    RI.stop(brakeType::hold);
-    robot.turn(180, 25, false);
-    robot.driveV2(13, 40);
-    robot.turn(80, 25, true);
-    robot.drive(4, 50);
-    robot.tiltTray(true);
-    LI.spin(forward, 200, velocityUnits::rpm);
-    RI.spin(forward, 200, velocityUnits::rpm);
-    robot.drive(-40, 10);
-    robot.tiltTray(false);
-    LI.stop(brakeType::coast);
-    RI.stop(brakeType::coast);
-  }
-  else if (autonPinConfig[0] == 0 && autonPinConfig[1] == 1)
-  {
-    
-  }
-  else if (autonPinConfig[0] == 1 && autonPinConfig[1] == 1)
-  {
-    
-  }
-  */
+  turnType turnDirection = left;
+
+  robot.controllerPrint("Autonomous Started");
+  /*if(Brain.ThreeWirePort.A.value() >= 2000)
+  {*/
+  Arm.calibrate();
+  I1.spin(forward, 200, rpm);
+  I2.spin(forward, 200, rpm);
+  wait(500, msec);
+  LIFT.rotateTo(5, degrees);
+  wait(500, msec);
+  LIFT.rotateTo(0, degrees);
+  wait(1000, msec);
+  robot.drive(45, 75);
+  robot.turn(180, turnDirection, 40);
+  robot.drive(55, 75);
+  I1.stop(brake);
+  I2.stop(brake);
+  T.rotateTo(254, deg, 150, rpm);
+  I1.spin(reverse, 50, rpm);
+  I2.spin(reverse, 50, rpm);
+  wait(1000, msec);
+  robot.drive(-30, 75);
+  
+  /*thread turning([]{
+      robot.turn(90, turnType::right);
+    });
+    turning.join();*/
+  robot.controllerPrint("Autonomous Finished");
 }
 
 void usercontrol(void)
 {
-  //bool tiltUp = false;
+  LIFT.rotateTo(30, degrees, 10, rpm);
+  robot.controllerPrint("Good Luck, Ryan!");
   while (true)
   {
-    printf("user control started\n");
-    int8_t speed;
-    while (true) {
-      //Slow down button
-      if (Controller1.ButtonA.pressing())
-      {
-        speed = 4;
-      }
-      else
-      {
-        speed = 1;
-      }
-
-      //Intake
-      if (Controller1.ButtonR1.pressing())
-      {
-        LI.spin(forward, 200, velocityUnits::rpm);
-        RI.spin(forward, 200, velocityUnits::rpm);
-      }
-      else if (Controller1.ButtonR2.pressing())
-      {
-        LI.spin(reverse, 200, velocityUnits::rpm);
-        RI.spin(reverse, 200, velocityUnits::rpm);
-      }
-      else
-      {
-        LI.stop(brakeType::hold);
-        RI.stop(brakeType::hold);
-      }
-
-      //Lift
-      if (Controller1.ButtonUp.pressing())
-      {
-        LIFT.spin(forward, 100, velocityUnits::rpm);
-      }
-      else if (Controller1.ButtonDown.pressing())
-      {
-        LIFT.spin(reverse, 100, velocityUnits::rpm);
-      }
-      else
-      {
-        LIFT.stop(brakeType::hold);
-      }
-
-      //Tilt
-      if(Controller1.ButtonL1.pressing())
-      {
-        TILT.spin(forward, 150, velocityUnits::rpm);
-      }
-      else if(Controller1.ButtonL2.pressing())
-      {
-        TILT.spin(reverse, 150, velocityUnits::rpm);
-      }
-      else
-      {
-        TILT.stop(brakeType::hold);
-      }
-
-      LF.spin(vex::directionType::fwd, (Controller1.Axis3.value() - Controller1.Axis1.value()/* - Controller1.Axis4.value()*/)/speed, vex::velocityUnits::pct); //(Axis3+Axis1)/2
-      LB.spin(vex::directionType::fwd, (Controller1.Axis3.value() - Controller1.Axis1.value()/* + Controller1.Axis4.value()*/)/speed, vex::velocityUnits::pct); //(Axis3+Axis1)/2
-      RF.spin(vex::directionType::fwd, (Controller1.Axis3.value() + Controller1.Axis1.value()/* + Controller1.Axis4.value()*/)/speed, vex::velocityUnits::pct); //(Axis3-Axis1)/2        
-      RB.spin(vex::directionType::fwd, (Controller1.Axis3.value() + Controller1.Axis1.value()/* - Controller1.Axis4.value()*/)/speed, vex::velocityUnits::pct); //(Axis3-Axis1)/2
-      //printf("Axis 1 = %ld\n", Controller.Axis1.value());
-      vex::task::sleep(20); //Sleep the task for a short amount of time to prevent wasted resources. 
+    if(Controller1.ButtonA.pressing())
+      autonomous();
+    if(Controller1.ButtonY.pressing())
+    {
+      Tray.calibrate();
+      Arm.calibrate();
     }
+    robot.controllerPrint("Tray: %.1f", Tray.m1.position(degrees));
+
+    Tray.spinMechanism(Controller1.ButtonUp, Controller1.ButtonDown, 50);
+    Tray.toggleMechanism(Controller1.ButtonX, 75);
+    Intake.spinMechanism(Controller1.ButtonR1, Controller1.ButtonR2, 200);
+    Arm.spinMechanism(Controller1.ButtonL1, Controller1.ButtonL2, 100);
+
+    //Sets controls to split arcade
+    robot.driveBase(Drive::SplitArcade);
+    wait(25, msec);
   }
 }
 
@@ -183,8 +124,11 @@ int main()
 {
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
+
   pre_auton();
-  while (true) {
+
+  while (true)
+  {
     wait(100, msec);
   }
 }
